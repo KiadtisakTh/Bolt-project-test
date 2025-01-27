@@ -11,15 +11,25 @@ import {
   Volume2,
   X,
   Mail,
-  Lock
+  Lock,
+  User,
+  Phone
 } from 'lucide-react';
 
 function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
   const [loginData, setLoginData] = useState({
     email: '',
     password: ''
+  });
+  const [registerData, setRegisterData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: ''
   });
   const [error, setError] = useState('');
 
@@ -27,23 +37,186 @@ function App() {
     e.preventDefault();
     setError('');
     
-    // Basic validation
     if (!loginData.email || !loginData.password) {
       setError('กรุณากรอกอีเมลและรหัสผ่าน');
       return;
     }
 
-    // Here you would typically make an API call to authenticate
     console.log('Logging in with:', loginData);
-    
-    // For demo purposes, simulate successful login
     setShowLogin(false);
-    // Reset form
     setLoginData({ email: '', password: '' });
+  };
+
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    // Validation
+    if (!registerData.fullName || !registerData.email || !registerData.password || !registerData.confirmPassword) {
+      setError('กรุณากรอกข้อมูลให้ครบทุกช่อง');
+      return;
+    }
+
+    if (registerData.password !== registerData.confirmPassword) {
+      setError('รหัสผ่านไม่ตรงกัน');
+      return;
+    }
+
+    if (registerData.password.length < 8) {
+      setError('รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร');
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(registerData.email)) {
+      setError('อีเมลไม่ถูกต้อง');
+      return;
+    }
+
+    // Phone validation (optional)
+    if (registerData.phone && !/^[0-9]{10}$/.test(registerData.phone)) {
+      setError('เบอร์โทรศัพท์ไม่ถูกต้อง');
+      return;
+    }
+
+    console.log('Registering with:', registerData);
+    setShowRegister(false);
+    setRegisterData({
+      fullName: '',
+      email: '',
+      phone: '',
+      password: '',
+      confirmPassword: ''
+    });
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-purple-100">
+      {/* Registration Modal */}
+      {showRegister && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4 relative">
+            <button 
+              onClick={() => setShowRegister(false)}
+              className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">สมัครสมาชิก</h2>
+            
+            {error && (
+              <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4">
+                {error}
+              </div>
+            )}
+            
+            <form onSubmit={handleRegister} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  ชื่อ-นามสกุล
+                </label>
+                <div className="relative">
+                  <User className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={registerData.fullName}
+                    onChange={(e) => setRegisterData({ ...registerData, fullName: e.target.value })}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="ชื่อ นามสกุล"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  อีเมล
+                </label>
+                <div className="relative">
+                  <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                  <input
+                    type="email"
+                    value={registerData.email}
+                    onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="your@email.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  เบอร์โทรศัพท์ (ไม่บังคับ)
+                </label>
+                <div className="relative">
+                  <Phone className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                  <input
+                    type="tel"
+                    value={registerData.phone}
+                    onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="0812345678"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  รหัสผ่าน
+                </label>
+                <div className="relative">
+                  <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                  <input
+                    type="password"
+                    value={registerData.password}
+                    onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  ยืนยันรหัสผ่าน
+                </label>
+                <div className="relative">
+                  <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                  <input
+                    type="password"
+                    value={registerData.confirmPassword}
+                    onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+              
+              <button
+                type="submit"
+                className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                สมัครสมาชิก
+              </button>
+            </form>
+            
+            <div className="mt-4 text-center text-sm text-gray-600">
+              มีบัญชีอยู่แล้ว?{' '}
+              <button 
+                className="text-indigo-600 hover:text-indigo-700"
+                onClick={() => {
+                  setShowRegister(false);
+                  setShowLogin(true);
+                }}
+              >
+                เข้าสู่ระบบ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Login Modal */}
       {showLogin && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
@@ -109,6 +282,19 @@ function App() {
                 ลืมรหัสผ่าน?
               </a>
             </div>
+
+            <div className="mt-4 text-center text-sm text-gray-600">
+              ยังไม่มีบัญชี?{' '}
+              <button 
+                className="text-indigo-600 hover:text-indigo-700"
+                onClick={() => {
+                  setShowLogin(false);
+                  setShowRegister(true);
+                }}
+              >
+                สมัครสมาชิก
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -128,7 +314,10 @@ function App() {
               >
                 เข้าสู่ระบบ
               </button>
-              <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+              <button 
+                onClick={() => setShowRegister(true)}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              >
                 สมัครสมาชิก
               </button>
             </div>
@@ -146,7 +335,10 @@ function App() {
             ฟังบทความ, ข่าวสาร, และพอดแคสต์คุณภาพได้ทุกที่ทุกเวลา
           </p>
           <div className="flex justify-center space-x-4">
-            <button className="px-8 py-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center">
+            <button 
+              onClick={() => setShowRegister(true)}
+              className="px-8 py-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center"
+            >
               <Crown className="w-5 h-5 mr-2" />
               ทดลองใช้ฟรี 7 วัน
             </button>
@@ -283,11 +475,14 @@ function PricingCard({ title, price, features, featured = false }) {
           </li>
         ))}
       </ul>
-      <button className={`w-full py-2 rounded-lg ${
-        featured 
-          ? 'bg-white text-indigo-600 hover:bg-gray-100' 
-          : 'bg-indigo-600 text-white hover:bg-indigo-700'
-      }`}>
+      <button 
+        onClick={() => setShowRegister(true)}
+        className={`w-full py-2 rounded-lg ${
+          featured 
+            ? 'bg-white text-indigo-600 hover:bg-gray-100' 
+            : 'bg-indigo-600 text-white hover:bg-indigo-700'
+        }`}
+      >
         เริ่มต้นใช้งาน
       </button>
     </div>
